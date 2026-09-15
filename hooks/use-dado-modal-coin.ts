@@ -1,37 +1,53 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { File, Paths } from 'expo-file-system';
 
-const DATAs = [
-  { id: 'bd7acbea', title: 'Bored Ape do Neymar #01', imageUrl: 'https://picsum.photos/seed/ape/400', floorPrice: 1, assetSymbol: 'ETH', assetId: 4 },
-  { id: '3ac68afc', title: 'Pixel Punk #42', imageUrl: 'https://picsum.photos/seed/punk/400', floorPrice: 8, assetSymbol: 'SOL', assetId: 2 },
-  { id: '58694a0f', title: 'Samurai Neon', imageUrl: 'https://picsum.photos/seed/samurai/400', floorPrice: 1, assetSymbol: 'ETH', assetId: 1 },
+const coinsd = [
+  { id: 'c1', name: 'Ethereum', symbol: 'ETH', balance: 2.5, currentPriceUsd: 3200 },
+  { id: 'c2', name: 'Bitcoin', symbol: 'BTC', balance: 0.15, currentPriceUsd: 62000 },
 ];
 
-export function useDadosModal() {
 
-    const [visible, setVisible] = useState(false);
-    const [listaNfts, setListaNfts] = useState(DATAs);
+const arquivoCoins = new File(Paths.document, 'coins.txt');
+
+export function useDadoCoin() {
+  const [visible, setVisible] = useState(false);
+  const [listaCoins, setListaCoins] = useState(coinsd);
+  const [nome, setNome] = useState('');
+  const [simbolo, setSimbolo] = useState('');
+  const [saldo, setSaldo] = useState('');
+  const [preco, setPreco] = useState('');
+
   
-    const [nomeNft, setNomeNft] = useState('');
-    const [urlImagem, setUrlImagem] = useState('');
-    const [precoNft, setPrecoNft] = useState('');
-    const [simbolo, setSimbolo] = useState('');
+  useEffect(() => {
+    try {
+      if (arquivoCoins.exists) { 
+        const conteudo = arquivoCoins.textSync();
+        if(conteudo) {
+          setListaCoins(JSON.parse(conteudo));
+        }
+      }
+    } catch (error) {
+      console.error("teu arquivo due merda:", error);
+    }
+  }, []);
 
   const showModal = () => setVisible(true);
   const hideModal = () => setVisible(false);
 
   return {
-    visible,
+    visible, 
     showModal,
     hideModal,
-    listaNfts,
-    setListaNfts,
-    nomeNft,
-    setNomeNft,
-    urlImagem,
-    setUrlImagem,
-    precoNft,
-    setPrecoNft,
-    simbolo,
-    setSimbolo
+    listaCoins,
+    setListaCoins,
+    nome,
+    setNome,
+    simbolo, 
+    setSimbolo,
+    saldo, 
+    setSaldo,
+    preco, 
+    setPreco,
+    arquivoCoins
   };
 }

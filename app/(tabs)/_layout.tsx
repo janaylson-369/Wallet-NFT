@@ -6,16 +6,15 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import {  useTheme } from 'react-native-paper';
 
 export default function TabLayout() {
-  const tema = useTheme(); // Puxa as cores dinâmicas do tema (seja claro ou escuro)
-
+  const tema = useTheme();
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: tema.colors.primary, // Usa a cor primária do tema atual
-        tabBarInactiveTintColor: tema.colors.onSurfaceVariant, // Usa a cor de superfície variante do tema atual
+        tabBarActiveTintColor: tema.colors.primary, 
+        tabBarInactiveTintColor: tema.colors.onSurfaceVariant, 
         tabBarStyle: {
-          backgroundColor: tema.colors.surface, // Usa a cor de superfície do tema atual
-          borderTopColor: tema.colors.outline, // Usa a cor de contorno do tema atual
+          backgroundColor: tema.colors.surface, 
+          borderTopColor: tema.colors.outline, 
         },
         headerShown: false,
         tabBarButton: HapticTab,

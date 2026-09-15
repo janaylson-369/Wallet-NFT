@@ -124,7 +124,7 @@ export default function NftScreen() {
                 value={urlImagem} 
                 onChangeText={setUrlImagem} 
                 style={{ marginBottom: 24 }} 
-                autoFocus
+                
               />
               <TextInput 
                 mode="outlined" 
