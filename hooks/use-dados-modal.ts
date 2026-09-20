@@ -14,6 +14,7 @@ export function useDadosModal() {
 
     const [visible, setVisible] = useState(false);
     const [listaNfts, setListaNfts] = useState(DATA);
+    const [nftSelecionado, setNftSelecionado] = useState<any>(undefined);
 
   //expo-file-system
   useEffect(() => {
@@ -27,13 +28,19 @@ export function useDadosModal() {
     }
   }, []);
   
-    const [nomeNft, setNomeNft] = useState('');
-    const [urlImagem, setUrlImagem] = useState('');
-    const [precoNft, setPrecoNft] = useState('');
-    const [simbolo, setSimbolo] = useState('');
 
   const showModal = () => setVisible(true);
   const hideModal = () => setVisible(false);
+
+  const abrirParaEditar = (nft: any) => {
+    setNftSelecionado(nft);
+    setVisible(true);
+  };
+
+  const abrirParaCriar = () => {
+    setNftSelecionado(undefined);
+    setVisible(true);
+  };
 
   
 
@@ -43,14 +50,9 @@ export function useDadosModal() {
     hideModal,
     listaNfts,
     setListaNfts,
-    nomeNft,
-    setNomeNft,
-    urlImagem,
-    setUrlImagem,
-    precoNft,
-    setPrecoNft,
-    simbolo,
-    setSimbolo,
-    arquivo
+    arquivo,
+    abrirParaEditar,
+    abrirParaCriar,
+    nftSelecionado
   };
 }

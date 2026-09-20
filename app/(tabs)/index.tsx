@@ -1,7 +1,9 @@
 import React from 'react';
 import { StyleSheet, View, ScrollView } from 'react-native';
-import { Appbar, Card, Text, List, Avatar, useTheme, Portal, Modal, Button, TextInput, IconButton } from 'react-native-paper';
+import { Appbar, Card, Text, Avatar, useTheme, Button, IconButton } from 'react-native-paper';
 import { useDadoCoin } from '../../hooks/use-dado-modal-coin';
+import Listamoeda from '@/components/ListaMoeda';
+import ModalCoin from '@/components/modals/modalCoin';
 
 const LeftContent = (props: any) => <Avatar.Icon {...props} icon="wallet" />;
 
@@ -12,38 +14,49 @@ export default function HomeScreen() {
   const {
     visible, showModal, hideModal,
     listaCoins, setListaCoins,
-    nome, setNome,
-    simbolo, setSimbolo,
-    saldo, setSaldo,
-    preco, setPreco,
-    arquivoCoins
+    arquivoCoins, coinSelecionado, abrirParaCriar,abrirParaEditar
   } = useDadoCoin();
 
-  const containerStyle = { backgroundColor: tema.colors.elevation.level3, padding: 20, margin: 20, borderRadius: 8 };
+  const criarOuEditCoin = (id: string | undefined, nome: string, simbolo: string, saldo: number, preco: number ) => {
+    let novaLista = [];
+    if (!id) {
+      const novaMoeda = { 
+        id: Math.random().toString(36).slice(2, 9), 
+        name: nome,
+        symbol: simbolo,
+        balance: saldo || 0,
+        currentPriceUsd: preco || 0,
+      };
+      
+      novaLista = [...listaCoins, novaMoeda];
+      
+    }else{
+      novaLista = listaCoins.map(item => {
+        if (item.id === id) {
+          return { ...item, name: nome, symbol: simbolo, balance: saldo, currentPriceUsd: preco };
+        }
+        return item;
+      });
 
-  const salvarNovaMoeda = () => {
-    const novaMoeda = { 
-      id: Math.random().toString(36).slice(2, 9), 
-      name: nome,
-      symbol: simbolo,
-      balance: parseFloat(saldo) || 0,
-      currentPriceUsd: parseFloat(preco) || 0,
-    };
-    
-    const novaLista = [...listaCoins, novaMoeda];
+    }
+
     setListaCoins(novaLista);
 
     try {
         if (!arquivoCoins.exists) arquivoCoins.create();
         arquivoCoins.write(JSON.stringify(novaLista)); 
-    } catch (error) {
-        console.error('Ei bixo criou não a moeda kkkk:', error);
-    }
-    
-    setNome(''); 
-    setSimbolo(''); 
-    setSaldo(''); 
-    setPreco('');
+      } catch (error) {
+          console.error('Ei bixo criou não a moeda kkkk:', error);
+      }
+
+    hideModal();
+  }
+
+
+  const deletarCoin = (id: string) => {
+    const novaLista = listaCoins.filter(item => item.id !== id);
+    setListaCoins(novaLista);
+    arquivoCoins.write(JSON.stringify(novaLista));
     hideModal();
   }
 
@@ -65,69 +78,26 @@ export default function HomeScreen() {
             <Text variant="headlineMedium">R$ 10.000,00</Text>
           </Card.Content>
         </Card>
+        
+        <Listamoeda
+          listaCoins={listaCoins}
+          onPress={abrirParaEditar}
+        />
 
-        <List.Section>
-
-          <List.Subheader>Criptoativos</List.Subheader>
-          
-          {listaCoins.map((coin: any) => (
-            <List.Item
-              key={coin.id} 
-              title={`${coin.name}`}
-              description={`cotação da moeda: $ ${coin.currentPriceUsd}  saldo: ${coin.balance} ${coin.symbol}`}
-              left={(props) => <List.Icon {...props} icon="" color={tema.colors.primary} />}
-            />
-          ))}
-
-        </List.Section>
-          <IconButton mode="contained"  icon="plus" style={{ margin: 16 }} onPress={showModal}/>
+        
+          <IconButton mode="contained"  icon="plus" style={{ margin: 16 }} onPress={abrirParaCriar}/>
         <Button mode="contained" icon="plus" style={{ marginTop: 16, marginBottom: 32 }} onPress={showModal}>
           Adicionar Moeda
         </Button>
       </ScrollView>
-
-      <Portal>
-        <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={containerStyle}>
-          <Text variant="titleLarge" style={{ marginBottom: 16 }}>Nova Moeda</Text>
-          
-          <TextInput 
-            mode="outlined" 
-            label="Nome (EX: Solana)" 
-            value={nome} 
-            onChangeText={setNome} 
-            style={{ marginBottom: 12 }} 
-            autoFocus
-          />
-          <TextInput 
-            mode="outlined" 
-            label="Símbolo da moeda" 
-            value={simbolo} 
-            onChangeText={setSimbolo} 
-            style={{ marginBottom: 12 }} 
-          />
-          <TextInput 
-            mode="outlined" 
-            label="saldo" 
-            value={saldo} 
-            onChangeText={setSaldo} 
-            keyboardType="numeric" 
-            style={{ marginBottom: 12 }} 
-          />
-          <TextInput 
-            mode="outlined" 
-            label="Preço do Dolar" 
-            value={preco} 
-            onChangeText={setPreco} 
-            keyboardType="numeric" 
-            style={{ marginBottom: 24 }} 
-          />
-
-          <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 8 }}>
-            <Button mode="text" onPress={hideModal}>Cancelar</Button>
-            <Button mode="contained" onPress={salvarNovaMoeda}>Salvar</Button>
-          </View>
-        </Modal>
-      </Portal>
+      
+      <ModalCoin
+        visible= {visible}
+        coin={coinSelecionado}
+        onAdd={criarOuEditCoin}
+        onDelete={deletarCoin}
+        onCancel={hideModal}
+      />
     </View>
   );
 }

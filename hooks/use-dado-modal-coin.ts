@@ -12,10 +12,7 @@ const arquivoCoins = new File(Paths.document, 'coins.txt');
 export function useDadoCoin() {
   const [visible, setVisible] = useState(false);
   const [listaCoins, setListaCoins] = useState(coinsd);
-  const [nome, setNome] = useState('');
-  const [simbolo, setSimbolo] = useState('');
-  const [saldo, setSaldo] = useState('');
-  const [preco, setPreco] = useState('');
+  const [coinSelecionado, setCoinSelecionado] = useState<any>(undefined);
 
   
   useEffect(() => {
@@ -34,20 +31,26 @@ export function useDadoCoin() {
   const showModal = () => setVisible(true);
   const hideModal = () => setVisible(false);
 
+  const abrirParaCriar = () => {
+    setCoinSelecionado(undefined);
+    setVisible(true);
+  };
+
+  const abrirParaEditar = (coin: any) => {
+    setCoinSelecionado(coin);
+    setVisible(true);
+  };
+
   return {
     visible, 
     showModal,
     hideModal,
     listaCoins,
     setListaCoins,
-    nome,
-    setNome,
-    simbolo, 
-    setSimbolo,
-    saldo, 
-    setSaldo,
-    preco, 
-    setPreco,
-    arquivoCoins
+    arquivoCoins,
+    coinSelecionado,
+    setCoinSelecionado,
+    abrirParaCriar,
+    abrirParaEditar
   };
 }
