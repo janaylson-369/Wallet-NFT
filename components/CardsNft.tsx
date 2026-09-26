@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet } from "react-native";
-import { Card, Text, useTheme } from "react-native-paper";
+import { Card, Text, useTheme, Button } from "react-native-paper";
 
 type ItemProps = {
   title: string;
@@ -9,7 +9,8 @@ type ItemProps = {
   imageUrl: string;
   assetId: number;
   assetSymbol: string;
-  onPress: () => void;
+  onPress: () => void;            
+  onPressDetalhes: () => void; 
 };
 
 const CardsNft = ({
@@ -20,6 +21,7 @@ const CardsNft = ({
   assetSymbol,
   assetId,
   onPress,
+  onPressDetalhes,
 }: ItemProps) => {
   const tema = useTheme();
 
@@ -39,9 +41,14 @@ const CardsNft = ({
           variant="bodyMedium"
           style={{ color: tema.colors.primary, fontWeight: "bold" }}
         >
-          Preço: {floorPrice} REDE: {assetSymbol} Idcoin: {assetId}
+          Preço: {floorPrice} {assetSymbol}
         </Text>
       </Card.Content>
+
+      <Card.Actions style={estiloNft.actions}>
+        <Button mode="contained-tonal"   compact icon="eye" onPress={onPressDetalhes}> Detalhes </Button>
+      </Card.Actions>
+      
     </Card>
   );
 };
@@ -50,7 +57,7 @@ export default CardsNft;
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  content: { padding: 16 },
+  content: { padding: 12, gap: 4 },
   card: { marginBottom: 8 },
 });
 
@@ -66,5 +73,9 @@ const estiloNft = StyleSheet.create({
     backgroundColor: "#230f2d",
   },
   cover: { height: 110, borderRadius: 6 },
-  content: { paddingTop: 4, gap: 4 },
+  actions: {
+    justifyContent: 'flex-end',
+    paddingHorizontal: 8,
+    paddingBottom: 8,
+  },
 });
