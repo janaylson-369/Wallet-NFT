@@ -1,10 +1,8 @@
-import { useEffect, useState } from 'react';
+import  { useEffect, useState } from 'react';
 import { StyleSheet, View, ScrollView } from 'react-native';
-import { Appbar, Card, Text, Avatar, useTheme, Button, IconButton } from 'react-native-paper';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Appbar, Card, Text, Avatar, useTheme, Button } from 'react-native-paper';
 import { useDadoCoin } from '../../hooks/use-dado-modal-coin';
 import Listamoeda from '@/components/ListaMoeda';
-import ModalCoin from '@/components/modals/modalCoin';
 import { router } from 'expo-router';
 import * as Location from 'expo-location';
 
@@ -12,7 +10,6 @@ const LeftContent = (props: any) => <Avatar.Icon {...props} icon="wallet" />;
 
 export default function HomeScreen() {
   const tema = useTheme();
-
   const [location, setLocation] = useState<any>(null);
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -27,7 +24,6 @@ export default function HomeScreen() {
     setLocation(location);
   }
 
-  // Executa automaticamente ao carregar a tela
   useEffect(() => {
     getPegarLocalizacao();
   }, []);
@@ -35,62 +31,24 @@ export default function HomeScreen() {
   let text = 'Waiting...';
   if (errorMsg) {
     text = errorMsg;
-  } else if (location) {
-    text = JSON.stringify(location);
+  } else if (location?.coords) {
+    text = `Lat: ${location.coords.latitude.toFixed(4)} | Long: ${location.coords.longitude.toFixed(4)}`;
   }
-  
-  const {
-    visible,
-    hideModal,
-    listaCoins,
-    setListaCoins,
-    coinSelecionado,
-    abrirParaCriar,
-    abrirParaEditar,
-  } = useDadoCoin();
 
+  const { listaCoins, setCoinSelecionado } = useDadoCoin();
 
-  const criarOuEditCoin = async (id: string | undefined, nome: string, simbolo: string, saldo: number, preco: number) => {
-    let novaLista = [];
-    if (!id) {
-      const novaMoeda = {
-        id: Math.random().toString(36).slice(2, 9),
-        name: nome,
-        symbol: simbolo,
-        balance: saldo || 0,
-        currentPriceUsd: preco || 0,
-      };
-      novaLista = [...listaCoins, novaMoeda];
-    } else {
-      novaLista = listaCoins.map((item) => {
-        if (item.id === id) {
-          return { ...item, name: nome, symbol: simbolo, balance: saldo, currentPriceUsd: preco };
-        }
-        return item;
-      });
-    }
-
-    setListaCoins(novaLista);
-    try {
-      await AsyncStorage.setItem('@WalletNFT:coins', JSON.stringify(novaLista));
-    } catch (error) {
-      console.error('Erro ao guardar moeda no AsyncStorage:', error);
-    }
-    hideModal();
+  const irParaCriar = () => {
+    setCoinSelecionado(undefined);
+    router.push('/screens/TelaFormCoin' as any);
   };
 
-  const deletarCoin = async (id: string) => {
-    const novaLista = listaCoins.filter((item) => item.id !== id);
-    setListaCoins(novaLista);
-    try {
-      await AsyncStorage.setItem('@WalletNFT:coins', JSON.stringify(novaLista));
-    } catch (error) {
-      console.error('Erro não eliminou a moeda no AsyncStorage:', error);
-    }
-    hideModal();
+  const irParaEditar = (coin: any) => {
+    setCoinSelecionado(coin);
+    router.push({
+      pathname: '/screens/TelaFormCoin',
+      params: { coinId: coin.id },
+    } as any);
   };
-
-
 
   return (
     <View style={[styles.container, { backgroundColor: tema.colors.background }]}>
@@ -114,22 +72,12 @@ export default function HomeScreen() {
           </Card.Content>
         </Card>
 
-        <Listamoeda listaCoins={listaCoins} onPress={abrirParaEditar} />
+        <Listamoeda listaCoins={listaCoins} onPress={irParaEditar} />
 
-        <IconButton mode="contained" icon="plus" style={{ margin: 16 }} onPress={abrirParaCriar} />
-        <IconButton mode="contained" icon="plus" style={{ margin: 16 }} onPress={() => router.push('/TelaFormCoin')} />
-        <Button mode="contained" icon="plus" style={{ marginTop: 16, marginBottom: 32 }} onPress={abrirParaCriar}>
+        <Button mode="contained" icon="plus" style={{ marginTop: 16, marginBottom: 32 }} onPress={irParaCriar}>
           Adicionar Moeda
         </Button>
       </ScrollView>
-
-      <ModalCoin
-        visible={visible}
-        coin={coinSelecionado}
-        onAdd={criarOuEditCoin}
-        onDelete={deletarCoin}
-        onCancel={hideModal}
-      />
     </View>
   );
 }

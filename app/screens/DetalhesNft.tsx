@@ -3,12 +3,31 @@ import { View, StyleSheet, ScrollView } from 'react-native';
 import { Appbar, Card, Text, Button, useTheme } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDadosModal } from '@/hooks/use-dados-modal';
-import { router } from 'expo-router';
-
+import { router, useLocalSearchParams } from 'expo-router';
 
 export default function DetalhesNft() {
+  
   const tema = useTheme();
+  const { nftId } = useLocalSearchParams<{ nftId?: string }>();
   const { nftSelecionado, listaNfts, setListaNfts } = useDadosModal();
+
+
+  const nft = nftSelecionado || listaNfts.find((item) => String(item.id) === String(nftId));
+
+  if (!nft) {
+    return (
+      <View style={[styles.container, { backgroundColor: tema.colors.background, justifyContent: 'center', alignItems: 'center', padding: 20 }]}>
+        <Text variant="titleMedium">Nenhum NFT selecionado.</Text>
+
+        <Button mode="contained" style={{ marginTop: 16 }}  onPress={() => router.replace('/(tabs)/Nft' as any)}>
+          Voltar para Meus NFTs
+        </Button>
+        
+      </View>
+    );
+  }
+
+  const valorConvertido = (Number(nft.floorPrice) || 0) * 2500;
 
   const deletarNft = async (id: string) => {
     const novaLista = listaNfts.filter((item) => item.id !== id);
@@ -18,43 +37,37 @@ export default function DetalhesNft() {
     } catch (error) {
       console.error('Erro ao excluir NFT no AsyncStorage:', error);
     }
-    router.push('/(tabs)/Nft');
+    router.replace('/(tabs)/Nft' as any);
   };
-
-
-  const valorConvertido = (Number(nftSelecionado.floorPrice)) * 2500;
 
   return (
     <View style={[styles.container, { backgroundColor: tema.colors.background }]}>
       <Appbar.Header>
-        <Appbar.BackAction onPress={() => router.push('/(tabs)/Nft')} />
+        <Appbar.BackAction onPress={() => router.replace('/(tabs)/Nft' as any)} />
         <Appbar.Content title="Detalhes do NFT" />
       </Appbar.Header>
 
       <ScrollView contentContainerStyle={styles.contentContainer}>
         <Card style={styles.card}>
           <Card.Cover
-            source={{ uri: nftSelecionado.imageUrl }}
+            source={{ uri: nft.imageUrl }}
             style={styles.coverAmpliada}
           />
           <Card.Content style={styles.cardContent}>
             <Text variant="labelSmall" style={{ opacity: 0.6 }}>
-              TOKEN ID: #{nftSelecionado.id}
+              TOKEN ID: #{nft.id}
             </Text>
-
             <Text variant="headlineSmall" style={{ fontWeight: 'bold' }}>
-              {nftSelecionado.title}
+              {nft.title}
             </Text>
-
             <Text variant="titleMedium" style={{ color: tema.colors.primary, fontWeight: 'bold' }}>
-              {nftSelecionado.floorPrice} {nftSelecionado.assetSymbol}
+              {nft.floorPrice} {nft.assetSymbol}
               <Text variant="bodyMedium" style={{ opacity: 0.7, color: tema.colors.onSurface }}>
-                {' '}(≈ $ {valorConvertido})
+                {' '}( $ {valorConvertido} )
               </Text>
             </Text>
-
             <Text variant="bodySmall" style={{ opacity: 0.5 }}>
-              Rede: {nftSelecionado.assetSymbol } (Simulada)
+              Rede: {nft.assetSymbol} (Simulada)
             </Text>
           </Card.Content>
         </Card>
@@ -65,8 +78,9 @@ export default function DetalhesNft() {
 
           <Button mode="outlined" textColor={tema.colors.error} 
             style={{ borderColor: tema.colors.error }}
-            onPress={() => deletarNft(nftSelecionado.id)}
-          > Excluir NFT
+            onPress={() => deletarNft(nft.id)}
+          >
+            Excluir NFT
           </Button>
         </View>
       </ScrollView>

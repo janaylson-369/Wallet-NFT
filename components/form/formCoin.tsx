@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text, TextInput, Button, useTheme } from 'react-native-paper';
 
@@ -11,7 +11,6 @@ export type FormCoinProps = {
 
 export default function FormCoin({ coin, onAdd, onCancel, onDelete }: FormCoinProps) {
   const tema = useTheme();
-
   const [id, setId] = useState('');
   const [nome, setNome] = useState('');
   const [simbolo, setSimbolo] = useState('');
@@ -20,11 +19,11 @@ export default function FormCoin({ coin, onAdd, onCancel, onDelete }: FormCoinPr
 
   useEffect(() => {
     if (coin) {
-      setId(coin.id );
-      setNome(coin.name );
-      setSimbolo(coin.symbol );
-      setSaldo(coin.balance);
-      setPreco(coin.currentPriceUsd);
+      setId(coin.id || '');
+      setNome(coin.name || '');
+      setSimbolo(coin.symbol || '');
+      setSaldo(coin.balance !== undefined ? String(coin.balance) : '');
+      setPreco(coin.currentPriceUsd !== undefined ? String(coin.currentPriceUsd) : '');
     } else {
       setId('');
       setNome('');
@@ -39,39 +38,38 @@ export default function FormCoin({ coin, onAdd, onCancel, onDelete }: FormCoinPr
       <Text variant="titleLarge" style={styles.title}>
         {id ? 'Editar Criptoativo' : 'Nova Moeda'}
       </Text>
-
       <TextInput
         mode="outlined"
         label="Nome (Ex: Solana)"
         value={nome}
         onChangeText={setNome}
+        style={{ marginBottom: 12 }}
       />
-
       <TextInput
         mode="outlined"
         label="Símbolo (Ex: SOL)"
         value={simbolo}
         onChangeText={setSimbolo}
+        style={{ marginBottom: 12 }}
       />
-
       <TextInput
         mode="outlined"
         label="Seu Saldo"
         value={saldo}
         onChangeText={setSaldo}
         keyboardType="numeric"
+        style={{ marginBottom: 12 }}
       />
-
       <TextInput
         mode="outlined"
         label="Preço USD Atual"
         value={preco}
         onChangeText={setPreco}
         keyboardType="numeric"
+        style={{ marginBottom: 16 }}
       />
-
       <View style={styles.botoes}>
-        {id && onDelete && (
+        {id && onDelete ? (
           <Button
             mode="contained"
             buttonColor={tema.colors.error}
@@ -79,12 +77,12 @@ export default function FormCoin({ coin, onAdd, onCancel, onDelete }: FormCoinPr
           >
             Deletar
           </Button>
-        )}
-        {onCancel && (
+        ) : null}
+        {onCancel ? (
           <Button mode="text" onPress={onCancel}>
             Cancelar
           </Button>
-        )}
+        ) : null}
         <Button
           mode="contained"
           onPress={() => onAdd(id || undefined, nome, simbolo, Number(saldo) || 0, Number(preco) || 0)}
